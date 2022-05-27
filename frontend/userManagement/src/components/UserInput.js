@@ -5,12 +5,13 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { COLORS } from '../../utils/Colors';
-const UserInput = ({ title, source }) => {
+const UserInput = ({ title, source, ...props }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inputWrapper}>
         <Image source={source} style={styles.user} />
         <TextInput
+          {...props}
           style={styles.inout}
           placeholder={title}
           placeholderTextColor={COLORS.fontgrey}

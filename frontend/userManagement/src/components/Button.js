@@ -5,10 +5,10 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { COLORS } from '../../utils/Colors';
-const Button = () => {
+const Button = ({ onpress, title }) => {
   return (
-    <TouchableOpacity style={styles.container}>
-      <Text style={styles.title}> login</Text>
+    <TouchableOpacity style={styles.container} onPress={onpress}>
+      <Text style={styles.title}> {title} </Text>
     </TouchableOpacity>
   );
 };

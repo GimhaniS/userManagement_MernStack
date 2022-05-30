@@ -5,7 +5,7 @@ const user = require('../../assets/user.jpg');
 const SplashScreen = ({ navigation }) => {
   const navigationHandler = () => {
     setTimeout(() => {
-      navigation.navigate('SignInScreen');
+      navigation.navigate('SignUpScreen');
     }, 500);
   };
   return (

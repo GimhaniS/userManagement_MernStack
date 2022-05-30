@@ -5,18 +5,21 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { COLORS } from '../../utils/Colors';
-const UserInput = ({ title, source, ...props }) => {
+const UserInput = ({ title, source, error, ...props }) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.inputWrapper}>
-        <Image source={source} style={styles.user} />
-        <TextInput
-          {...props}
-          style={styles.inout}
-          placeholder={title}
-          placeholderTextColor={COLORS.fontgrey}
-        />
+    <View style={styles.wrapper}>
+      <View style={styles.container}>
+        <View style={styles.inputWrapper}>
+          <Image source={source} style={styles.user} />
+          <TextInput
+            {...props}
+            style={styles.inout}
+            placeholder={title}
+            placeholderTextColor={COLORS.fontgrey}
+          />
+        </View>
       </View>
+      <Text style={styles.error}>{error}</Text>
     </View>
   );
 };
@@ -24,6 +27,10 @@ const UserInput = ({ title, source, ...props }) => {
 export { UserInput };
 
 const styles = StyleSheet.create({
+  // wrapper: {
+  //   justifyContent: 'flex-start',
+  //   alignItems: 'flex-start',
+  // },
   container: {
     marginTop: hp(2),
     borderWidth: 2,
@@ -49,5 +56,11 @@ const styles = StyleSheet.create({
     width: wp('80%'),
     fontWeight: '700',
     fontSize: 17,
+  },
+  error: {
+    color: COLORS.errorText,
+    fontSize: 15,
+    fontWeight: '600',
+    marginRight: wp(50),
   },
 });

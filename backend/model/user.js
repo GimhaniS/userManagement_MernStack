@@ -16,6 +16,11 @@ var userSchema = new Schema({
     required: true,
     // minlength:8
   },
+  verified: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("user", userSchema);

@@ -1,10 +1,26 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Alert, Text, View } from 'react-native';
 import React from 'react';
 import { COLORS } from '../../../utils/Colors';
-const HomeScreen = () => {
+import { useSelector, useDispatch } from 'react-redux';
+import { Finishregistration } from '../../store/actions/AuthActions';
+import { Button } from '../../components';
+const HomeScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+
+  const { token } = useSelector((state) => state.authReducer);
+  console.log('token====>', token);
+  if (token) {
+    Alert.alert('succefuly logged!');
+  } else {
+    Alert.alert('login failed');
+  }
+  const onpress = () => {
+    navigation.navigate('ForgetPwScreen');
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.text}>HomeScreen</Text>
+      <Button title="go" onpress={onpress} />
     </View>
   );
 };

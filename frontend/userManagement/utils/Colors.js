@@ -5,4 +5,5 @@ export const COLORS = {
   fontgrey: '#8A9AB0',
   grey: '#E6EAEC',
   buttonBackground: '#234CF5',
+  errorText: '#FF0000',
 };

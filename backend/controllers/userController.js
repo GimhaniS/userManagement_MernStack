@@ -1,8 +1,15 @@
 const User = require("../model/user");
+const verificationToken = require("../model/verificationToken");
 const ErrorHandler = require("../model/errorHandler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
+const generatedOtp = require("../utils/mail");
+
+// const mailTransport = require("../utils/mail");
+const nodemailer = require("nodemailer");
+const { isValidObjectId } = require("mongoose");
+// const emailTemplate = require("../utils/mail");
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 //get all users
 
@@ -45,11 +52,13 @@ const userRegister = async (req, res) => {
   try {
     signUpUser = await User.findOne({ email });
   } catch (err) {
-    res.status(500).json({ message: "user registration failed." });
+    res
+      .status(500)
+      .json({ success: false, message: "user registration failed." });
     // return next(error);
   }
   if (signUpUser) {
-    res.status(422).json({ message: "user exists." });
+    res.status(422).json({ success: false, message: "user exists." });
     // return next(error);
   }
 
@@ -58,7 +67,9 @@ const userRegister = async (req, res) => {
   try {
     hashedPassword = await bcrypt.hash(password, 12);
   } catch (err) {
-    res.status(500).json({ message: "could not create user.try again" });
+    res
+      .status(500)
+      .json({ success: false, message: "could not create user.try again" });
   }
 
   const user = new User({
@@ -67,10 +78,49 @@ const userRegister = async (req, res) => {
     password: hashedPassword,
   });
 
+  //generating otp
+  const OTP = generatedOtp();
+
+  //hashing verification token
+
+  let hashedOtp;
+
+  try {
+    hashedOtp = await bcrypt.hash(OTP, 8);
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "could not create verification token .try again",
+    });
+  }
+
+  const verfication_token = new verificationToken({
+    owner: user._id,
+    token: hashedOtp,
+  });
+
+  var mailTransport = nodemailer.createTransport({
+    host: "smtp.mailtrap.io",
+    port: 2525,
+    // service: "Gmail",
+    auth: {
+      user: process.env.MAILTRAP_USERNAME,
+      pass: process.env.MAILTRAP_PASSWORD,
+    },
+  });
+
+  mailTransport.sendMail({
+    from: "g.kasuni.samarasingh@gmail.com",
+    to: user.email,
+    subject: "Verify your email account",
+    html: `<p> Welcome to the team! your otp is <b>${OTP}</b></p>`,
+  });
+
   try {
     const savedUser = await user.save();
+    const verficationToken = await verfication_token.save();
   } catch (err) {
-    res.status(500).json({ message: "signup failed." });
+    res.status(500).json({ success: false, message: "signup failed." });
   }
 
   // let token;
@@ -84,7 +134,9 @@ const userRegister = async (req, res) => {
   //   res.status(500).json({ message: "signup failed.try again" });
   // }
 
-  res.status(201).json({ user: user.toObject({ getters: true }) });
+  res
+    .status(201)
+    .json({ success: true, user: user.toObject({ getters: true }) });
 };
 
 // login
@@ -124,7 +176,9 @@ const userLogin = async (req, res) => {
   try {
     isValidPassword = await bcrypt.compare(password, signInUser.password);
   } catch (err) {
-    res.status(500).json({ message: "couldn't log in. Check credentials." });
+    res
+      .status(500)
+      .json({ message: "couldn't log in. Credientials are not matched." });
     return;
   }
 
@@ -134,7 +188,7 @@ const userLogin = async (req, res) => {
   }
 
   let token;
-  token = auth(signInUser.email, signInUser.id, "30d");
+  token = auth(signInUser.email, signInUser._id, "30d");
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       res.status(500).json({ message: "login failed.try again" });
@@ -144,7 +198,7 @@ const userLogin = async (req, res) => {
       return res.status(200).json({
         success: true,
         token: token,
-        message: signInUser,
+        user: signInUser,
       });
     }
   });
@@ -159,8 +213,54 @@ const userLogin = async (req, res) => {
   res.status(200).json({ user: signInUser.toObject({ getters: true }) });
 };
 
+const verifyEmail = async (req, res) => {
+  const { userId, otp } = req.body;
+
+  if (!userId || !otp) {
+    res
+      .status(422)
+      .json({ success: false, message: "Invalid request,missing paramters" });
+  }
+  if (!isValidObjectId) {
+    res.status(422).json({ success: false, message: "Invalid user id" });
+  }
+  const userN = await User.findById(userId);
+  if (!userN) {
+    res.status(404).json({ success: false, message: "userNot Found!" });
+  }
+  if (userN.verified) {
+    res
+      .status(422)
+      .json({ success: false, message: "user is already verified!" });
+  }
+  const token = await verificationToken.findOne({ owner: userN._id });
+  if (!token) {
+    res.status(404).json({ success: false, message: "user not found" });
+  }
+
+  const result = await bcrypt.compare(token, otp);
+  if (!result) {
+    res
+      .status(404)
+      .json({ success: false, message: "Please provide a valid otp" });
+  }
+
+  userN.verified = true;
+
+  await verificationToken.findByIdAndDelete(token._id);
+  await userN.save();
+
+  mailTransport.sendMail({
+    from: "g.kasuni.samarasingh@gmail.com",
+    to: userN.email,
+    subject: "Verify your email account",
+    html: `<p> Email Verified Successfully.</p>`,
+  });
+};
+
 module.exports = {
   getUsers,
   userRegister,
   userLogin,
+  verifyEmail,
 };

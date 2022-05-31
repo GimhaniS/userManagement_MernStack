@@ -6,6 +6,7 @@ const {
   userRegister,
   userLogin,
   verifyEmail,
+  forgotPassword,
 } = require("../controllers/userController");
 
 router.get("/", getUsers);
@@ -15,5 +16,7 @@ router.post("/register", userRegister);
 router.post("/login", userLogin);
 
 router.post("/verifyEmail", verifyEmail);
+
+router.post("/forgotPassword", forgotPassword);
 
 module.exports = router;

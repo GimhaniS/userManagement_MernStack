@@ -1,18 +1,21 @@
 const User = require("../model/user");
 const verificationToken = require("../model/verificationToken");
+const resetToken = require("../model/resetToken");
 const ErrorHandler = require("../model/errorHandler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 const generatedOtp = require("../utils/mail");
-
+const createRandomBytes = require("../utils/helper");
 // const mailTransport = require("../utils/mail");
 const nodemailer = require("nodemailer");
 const { isValidObjectId } = require("mongoose");
+const user = require("../model/user");
 // const emailTemplate = require("../utils/mail");
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-//get all users
 
+//get all users
+///////////////////////////////////
 const getUsers = async (req, res) => {
   let users;
   try {
@@ -28,7 +31,7 @@ const getUsers = async (req, res) => {
 };
 
 // register
-
+////////////////////////////////////////////////////
 const userRegister = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -123,23 +126,14 @@ const userRegister = async (req, res) => {
     res.status(500).json({ success: false, message: "signup failed." });
   }
 
-  // let token;
-  // try {
-  //   token = jwt.sign(
-  //     { userId: user.id, email: user.email },
-  //     process.env.JWT_SECRET,
-  //     { expires: "30d" }
-  //   );
-  // } catch (err) {
-  //   res.status(500).json({ message: "signup failed.try again" });
-  // }
-
   res
     .status(201)
     .json({ success: true, user: user.toObject({ getters: true }) });
 };
 
-// login
+// ///login
+
+////////////////////////////////////////
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
   let errors = [];
@@ -203,16 +197,11 @@ const userLogin = async (req, res) => {
     }
   });
 
-  // res.json({
-  //   userId: signInUser.id,
-  //   email: signInUser.email,
-  //   token: token,
-  //   status: 200,
-  // });
-  // res.status(500).json({ message: "issue" });
   res.status(200).json({ user: signInUser.toObject({ getters: true }) });
 };
 
+// /////////////verfication email
+////////////////////////////////////////////
 const verifyEmail = async (req, res) => {
   const { userId, otp } = req.body;
 
@@ -234,11 +223,13 @@ const verifyEmail = async (req, res) => {
       .json({ success: false, message: "user is already verified!" });
   }
   const token = await verificationToken.findOne({ owner: userN._id });
+  // console.log("token", token.token);
+  // console.log("otp", otp);
   if (!token) {
     res.status(404).json({ success: false, message: "user not found" });
   }
 
-  const result = await bcrypt.compare(token, otp);
+  const result = await bcrypt.compare(otp, token.token);
   if (!result) {
     res
       .status(404)
@@ -250,17 +241,107 @@ const verifyEmail = async (req, res) => {
   await verificationToken.findByIdAndDelete(token._id);
   await userN.save();
 
+  var mailTransport = nodemailer.createTransport({
+    host: "smtp.mailtrap.io",
+    port: 2525,
+    // service: "Gmail",
+    auth: {
+      user: process.env.MAILTRAP_USERNAME,
+      pass: process.env.MAILTRAP_PASSWORD,
+    },
+  });
+
   mailTransport.sendMail({
     from: "g.kasuni.samarasingh@gmail.com",
     to: userN.email,
-    subject: "Verify your email account",
+    subject: "Welcome email",
     html: `<p> Email Verified Successfully.</p>`,
+  });
+
+  res.json({
+    success: true,
+    message: "your email is verified",
+    user: { name: userN.name, email: userN.email, id: userN.id },
   });
 };
 
+// forgot passowrd
+/////////////////////////////
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  //email null validation
+  if (!email) {
+    res
+      .status(404)
+      .json({ success: false, message: "Please provide a valid email" });
+  }
+  const user = await User.findOne({ email });
+  //user null validation for requested email
+  if (!user) {
+    res
+      .status(404)
+      .json({ success: false, message: "User not found, Invalid request " });
+  }
+
+  // creating random bytes
+  const randomBytes = await createRandomBytes();
+  console.log("random byte", randomBytes);
+
+  //hashing created random token
+  let hashedRandomBytesOTP;
+  try {
+    hashedRandomBytesOTP = await bcrypt.hash(randomBytes, 8);
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "could not create reset token .try again",
+    });
+  }
+  console.log("random byte", randomBytes);
+  const reset_token = new resetToken({
+    owner: user._id,
+    token: hashedRandomBytesOTP,
+  });
+
+  console.log("reset_token", reset_token);
+  console.log("hashed random byte", hashedRandomBytesOTP);
+
+  const token = await resetToken.findOne({ owner: user._id });
+  console.log("token", token);
+  if (token) {
+    res.status(404).json({
+      success: false,
+      message: "OTP cannot be requested. try again later.",
+    });
+  }
+
+  //comparing reset token
+  const result = await bcrypt.compare(reset_token, token);
+
+  await reset_token.save();
+
+  var mailTransport = nodemailer.createTransport({
+    host: "smtp.mailtrap.io",
+    port: 2525,
+    // service: "Gmail",
+    auth: {
+      user: process.env.MAILTRAP_USERNAME,
+      pass: process.env.MAILTRAP_PASSWORD,
+    },
+  });
+
+  mailTransport.sendMail({
+    from: "security@gmail.com",
+    to: user.email,
+    subject: "Password Reset",
+    html: `<p> Reset the password! your otp is <b>${randomBytes}</b></p>`,
+  });
+};
 module.exports = {
   getUsers,
   userRegister,
   userLogin,
   verifyEmail,
+  forgotPassword,
 };

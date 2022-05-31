@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const verificationTokenSchema = new mongoose.Schema({
+const resetTokenSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -12,9 +12,9 @@ const verificationTokenSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    expires: "3h",
+    expires: 3600,
     default: Date.now(),
   },
 });
 
-module.exports = mongoose.model("verificationToken", verificationTokenSchema);
+module.exports = mongoose.model("resetToken", resetTokenSchema);

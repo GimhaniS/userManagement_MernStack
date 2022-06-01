@@ -1,7 +1,7 @@
 const User = require("../model/user");
 const verificationToken = require("../model/verificationToken");
 const resetToken = require("../model/resetToken");
-const ErrorHandler = require("../model/errorHandler");
+// const ErrorHandler = require("../model/errorHandler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
@@ -136,6 +136,7 @@ const userRegister = async (req, res) => {
 ////////////////////////////////////////
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
+  console.log("password", password);
   let errors = [];
 
   if (!password) {
@@ -165,10 +166,11 @@ const userLogin = async (req, res) => {
     res.status(401).json({ message: "invalid credentials !" });
     return;
   }
-
+  console.log("new password", signInUser.password);
   let isValidPassword = false;
   try {
     isValidPassword = await bcrypt.compare(password, signInUser.password);
+    console.log("isvalid", isValidPassword);
   } catch (err) {
     res
       .status(500)
@@ -251,6 +253,7 @@ const verifyEmail = async (req, res) => {
   await verificationToken.findByIdAndDelete(token._id);
   await userN.save();
 
+  //sending email
   var mailTransport = nodemailer.createTransport({
     host: "smtp.mailtrap.io",
     port: 2525,
@@ -286,15 +289,11 @@ const forgotPassword = async (req, res) => {
       .status(404)
       .json({ success: false, message: "Please provide a valid email" });
   }
+  //user null validation for requested email
   const user = await User.findOne({ email });
   if (!user) {
     res.status(404).json({ success: false, message: "userNot Found!" });
   }
-  //user null validation for requested email
-  // const newUser = await User.findById(userId);
-  // if (!newUser) {
-  //   res.status(404).json({ success: false, message: "userNot Found!" });
-  // }
 
   // creating random bytes
   // const randomBytes = await createRandomBytes();
@@ -325,15 +324,15 @@ const forgotPassword = async (req, res) => {
     });
   }
 
-  console.log("random byte", randomBytes);
+  // console.log("random byte", randomBytes);
   const reset_token = new resetToken({
     owner: user._id,
     token: hashedRandomBytesOTP,
   });
 
-  console.log("reset_token", reset_token);
-  console.log("hashed random byte", hashedRandomBytesOTP);
-  console.log("reset_token", reset_token);
+  // console.log("reset_token", reset_token);
+  // console.log("hashed random byte", hashedRandomBytesOTP);
+  // console.log("reset_token", reset_token);
 
   //saving in DB
   await reset_token.save();
@@ -387,8 +386,21 @@ const resetPassword = async (req, res) => {
   // });
 
   //resetting thepassword in stored in db
-  user.password = password;
-  console.log("user===>", user);
+
+  let hashednewPassword;
+  try {
+    hashednewPassword = await bcrypt.hash(password, 8);
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "could not create reset token .try again",
+    });
+  }
+  console.log(" hashed passowrd ===>", hashednewPassword);
+
+  user.password = hashednewPassword;
+  console.log("user===>", user.password);
+
   await user.save();
   //removing token
   await resetToken.findOneAndDelete({ owner: user._id });

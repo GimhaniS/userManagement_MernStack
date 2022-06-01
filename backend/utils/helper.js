@@ -1,4 +1,4 @@
-const crypto = require("crypto-js");
+const crypto = require("crypto");
 
 //creating random token
 const createRandomBytes = () =>
@@ -8,10 +8,8 @@ const createRandomBytes = () =>
 
       const token = buff.toString("hex");
       resolve(token);
-      console.log("random Bytes", token);
+      console.log("random Bytes==>", token);
     });
   });
 
-module.exports = {
-  createRandomBytes,
-};
+module.exports = createRandomBytes;

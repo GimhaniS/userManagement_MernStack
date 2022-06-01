@@ -156,7 +156,7 @@ const userLogin = async (req, res) => {
 
   let signInUser;
   try {
-    signInUser = await User.findOne({ email: email });
+    signInUser = await User.findOne({ email });
   } catch (err) {
     res.status(500).json({ message: "log in failed." });
     return;
@@ -182,7 +182,14 @@ const userLogin = async (req, res) => {
   }
 
   let token;
-  token = auth(signInUser.email, signInUser._id, "30d");
+  token = jwt.sign(
+    { email: signInUser.email, UserId: signInUser._id },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: 86400,
+    }
+  );
+
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       res.status(500).json({ message: "login failed.try again" });
@@ -197,7 +204,9 @@ const userLogin = async (req, res) => {
     }
   });
 
-  res.status(200).json({ user: signInUser.toObject({ getters: true }) });
+  res
+    .status(201)
+    .json({ success: true, user: signInUser.toObject({ getters: true }) });
 };
 
 // /////////////verfication email
@@ -223,8 +232,9 @@ const verifyEmail = async (req, res) => {
       .json({ success: false, message: "user is already verified!" });
   }
   const token = await verificationToken.findOne({ owner: userN._id });
-  // console.log("token", token.token);
-  // console.log("otp", otp);
+  console.log("token", token);
+  console.log("token.token", token.token);
+  console.log("otp", otp);
   if (!token) {
     res.status(404).json({ success: false, message: "user not found" });
   }
@@ -265,28 +275,32 @@ const verifyEmail = async (req, res) => {
   });
 };
 
-// forgot passowrd
+// forgot password
 /////////////////////////////
 const forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const { userId, email } = req.body;
 
   //email null validation
-  if (!email) {
+  if (!email || !userId) {
     res
       .status(404)
       .json({ success: false, message: "Please provide a valid email" });
   }
   const user = await User.findOne({ email });
-  //user null validation for requested email
   if (!user) {
-    res
-      .status(404)
-      .json({ success: false, message: "User not found, Invalid request " });
+    res.status(404).json({ success: false, message: "userNot Found!" });
   }
+  //user null validation for requested email
+  // const newUser = await User.findById(userId);
+  // if (!newUser) {
+  //   res.status(404).json({ success: false, message: "userNot Found!" });
+  // }
 
   // creating random bytes
-  const randomBytes = await createRandomBytes();
-  console.log("random byte", randomBytes);
+  // const randomBytes = await createRandomBytes();
+  const randomBytes = await generatedOtp();
+
+  // console.log("random byte", randomBytes);
 
   //hashing created random token
   let hashedRandomBytesOTP;
@@ -298,6 +312,19 @@ const forgotPassword = async (req, res) => {
       message: "could not create reset token .try again",
     });
   }
+
+  const token = await resetToken.findOne({ owner: user._id });
+
+  console.log("token", token);
+  console.log("user._id from other s", user._id);
+
+  if (token) {
+    res.status(404).json({
+      success: false,
+      message: "new otp can't send. try again in 1hr",
+    });
+  }
+
   console.log("random byte", randomBytes);
   const reset_token = new resetToken({
     owner: user._id,
@@ -306,19 +333,9 @@ const forgotPassword = async (req, res) => {
 
   console.log("reset_token", reset_token);
   console.log("hashed random byte", hashedRandomBytesOTP);
+  console.log("reset_token", reset_token);
 
-  const token = await resetToken.findOne({ owner: user._id });
-  console.log("token", token);
-  if (token) {
-    res.status(404).json({
-      success: false,
-      message: "OTP cannot be requested. try again later.",
-    });
-  }
-
-  //comparing reset token
-  const result = await bcrypt.compare(reset_token, token);
-
+  //saving in DB
   await reset_token.save();
 
   var mailTransport = nodemailer.createTransport({
@@ -337,11 +354,71 @@ const forgotPassword = async (req, res) => {
     subject: "Password Reset",
     html: `<p> Reset the password! your otp is <b>${randomBytes}</b></p>`,
   });
+  res.json({
+    success: true,
+    message: "password reset otp sent to the email",
+  });
 };
+
+const resetPassword = async (req, res) => {
+  const { password } = req.body;
+  console.log("password req.body===>", password);
+
+  const user = await User.findById(req.user._id);
+  // console.log("user===>", user);
+  if (!user) {
+    res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+  console.log("user.password===>", user.password);
+  const isSamePassword = await bcrypt.compare(password, user.password);
+  if (isSamePassword) {
+    res.status(404).json({
+      success: false,
+      message: "New password should be different ",
+    });
+  }
+  // if(password.trim().length<8 || password.trim().lenght>20)
+  // res.status(404).json({
+  //   success: false,
+  //   message: "Password must be 8 to 20 characters long!",
+  // });
+
+  //resetting thepassword in stored in db
+  user.password = password;
+  console.log("user===>", user);
+  await user.save();
+  //removing token
+  await resetToken.findOneAndDelete({ owner: user._id });
+  var mailTransport = nodemailer.createTransport({
+    host: "smtp.mailtrap.io",
+    port: 2525,
+    // service: "Gmail",
+    auth: {
+      user: process.env.MAILTRAP_USERNAME,
+      pass: process.env.MAILTRAP_PASSWORD,
+    },
+  });
+
+  mailTransport.sendMail({
+    from: "security@gmail.com",
+    to: user.email,
+    subject: "Password Reset successfully",
+    html: `<p>Password Reset successfully.Use your new password ofr logging</b></p>`,
+  });
+
+  res
+    .status(201)
+    .json({ success: true, message: "Password Reset successfully" });
+};
+
 module.exports = {
   getUsers,
   userRegister,
   userLogin,
   verifyEmail,
   forgotPassword,
+  resetPassword,
 };

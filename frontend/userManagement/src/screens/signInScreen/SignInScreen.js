@@ -73,6 +73,7 @@ const SignInScreen = ({ navigation }) => {
 
   const forgotPasswordHandler = () => {
     console.log('Pasword forgot');
+    navigation.navigate('ForgetPwScreen');
   };
 
   return (

@@ -8,7 +8,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { useDispatch } from 'react-redux';
-import { SignupAction } from '../../store/actions/AuthActions';
+import { SignupAction, VerifyEmailAction } from '../../store/actions/AuthActions';
 const user = require('../../assets/user_icon.png');
 const emailIcons = require('../../assets/email.png');
 const pw = require('../../assets/password.png');
@@ -24,9 +24,11 @@ const SignUpScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [usernameError, setUsernameError] = useState('');
   const [loading, setLoading] = useState('');
+
   const onpress = () => {
     navigation.navigate('SignInScreen');
   };
+
   const signUpHandler = async () => {
     setLoading(true);
 
@@ -60,9 +62,18 @@ const SignUpScreen = ({ navigation }) => {
       return null;
     }
 
-    console.log(`user entered ${username} and ${email} and ${password}`);
-
-    navigation.navigate('OtpScreen', { username, email, password });
+    if (email !== '' && username !== '' && password !== '') {
+      console.log(`user entered ${username} and ${email} and ${password}`);
+      const res = await dispatch(SignupAction(username, email, password));
+      console.log('res of signUp', res);
+      if (!res) {
+        setEmailError('Email already exists.');
+        return null;
+      } else {
+        setEmailError('');
+        navigation.navigate('OtpScreen', { username, email, password });
+      }
+    }
 
     // const res = await dispatch(SignupAction(username, email, password));
 

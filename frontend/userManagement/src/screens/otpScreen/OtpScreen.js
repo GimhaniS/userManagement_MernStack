@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { ActionSheetIOS, Alert, StyleSheet, Text, View } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { COLORS } from '../../../utils/Colors';
 import { useDispatch, useSelector } from 'react-redux';
-import { SignupAction } from '../../store/actions/AuthActions';
+import { VerifyEmailAction, Finishregistration } from '../../store/actions/AuthActions';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import { resetPasswordAction } from '../../store/actions/AuthActions';
 import { Button, UserInput, userInput } from '../../components';
 // import OTPInputView from '@twotalltotems/react-native-otp-input';
 const OtpScreen = ({ navigation, route }) => {
@@ -14,16 +15,49 @@ const OtpScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [otpcode, setOtpcode] = useState();
   const [otpError, setOtpError] = useState();
-  const { name } = route.params;
+  // const { name } = route.params;
   const { email } = route.params;
   const { password } = route.params;
+  const { id, token } = useSelector((state) => state.authReducer);
+  // const otpRef = useRef(null);
 
-  const otpRef = useRef(null);
-  const onpress = () => {
-    // console.log(`user entered (otp screen)${name} and ${email} and ${password}`);
-    // const res = await dispatch(SignupAction(name, email, password));
+  useEffect(() => {
+    console.log('user id===>', id);
+    console.log('token====>', token);
+  }, []);
 
-    console.log('sign up===>', pressed);
+  const onpress = async () => {
+    console.log('otp===>', otpcode);
+    if (otpcode === '') {
+      setOtpError('Please enter the OTP. ');
+    }
+    if (otpcode !== '') {
+      console.log(`user entered ${otpcode}`);
+      const res = await dispatch(VerifyEmailAction(otpcode, id));
+      console.log('res of emailverify', res);
+      if (!res) {
+        setOtpError('InCorrect OTP.');
+        return null;
+      } else {
+        setOtpError('');
+      }
+      Alert.alert('', 'Your account has been verified', [
+        { text: 'OK', onPress: () => registrationHandler() },
+      ]);
+      const registrationHandler = () => {
+        if (res) {
+          if (token) {
+            console.log('successfully logged!');
+            dispatch(Finishregistration());
+          } else {
+            console.log('login failed');
+            navigation.navigate('splashScreen');
+          }
+        }
+      };
+    }
+
+    // console.log('sign up===>', pressed);
   };
   return (
     <View style={styles.container}>
@@ -46,6 +80,8 @@ const OtpScreen = ({ navigation, route }) => {
           console.log('otppp');
         }}
       /> */}
+      <Text style={styles.vcode}>Verification Code</Text>
+      <Text style={styles.text}> Please enter the verification code sent to your email. </Text>
       <UserInput
         title="Otp"
         // source={emailIcons}
@@ -69,7 +105,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: COLORS.fontTitle,
-    fontSize: 35,
+    fontSize: 25,
     fontWeight: '700',
   },
   underlineStyleBase: {
@@ -84,5 +120,10 @@ const styles = StyleSheet.create({
   },
   underlineStyleHighLighted: {
     borderColor: '#ED3D39',
+  },
+  vcode: {
+    color: COLORS.fontTitle,
+    fontSize: 35,
+    fontWeight: '700',
   },
 });

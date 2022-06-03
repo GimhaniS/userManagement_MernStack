@@ -126,9 +126,16 @@ const userRegister = async (req, res) => {
     res.status(500).json({ success: false, message: "signup failed." });
   }
 
-  res
-    .status(201)
-    .json({ success: true, user: user.toObject({ getters: true }) });
+  // res
+  //   .status(201)
+  //   .json({ success: true, user: user.toObject({ getters: true }) });
+
+  res.json({
+    success: true,
+    message: "signUp successfully. check otp",
+    user: user,
+    token: verfication_token.token,
+  });
 };
 
 // ///login
@@ -206,9 +213,15 @@ const userLogin = async (req, res) => {
     }
   });
 
-  res
-    .status(201)
-    .json({ success: true, user: signInUser.toObject({ getters: true }) });
+  // res
+  //   .status(201)
+  //   .json({ success: true, user: signInUser.toObject({ getters: true }) });
+
+  res.json({
+    success: true,
+    message: "signin successfully.welcome",
+    user: signInUser,
+  });
 };
 
 // /////////////verfication email
@@ -271,20 +284,26 @@ const verifyEmail = async (req, res) => {
     html: `<p> Email Verified Successfully.</p>`,
   });
 
+  // res.json({
+  //   success: true,
+  //   message: "your email is verified",
+  //   user: { username: userN.name, email: userN.email, id: userN.id },
+  // });
+
   res.json({
     success: true,
     message: "your email is verified",
-    user: { name: userN.name, email: userN.email, id: userN.id },
+    user: userN,
   });
 };
 
 // forgot password
 /////////////////////////////
 const forgotPassword = async (req, res) => {
-  const { userId, email } = req.body;
+  const { email } = req.body;
 
   //email null validation
-  if (!email || !userId) {
+  if (!email) {
     res
       .status(404)
       .json({ success: false, message: "Please provide a valid email" });
@@ -356,6 +375,7 @@ const forgotPassword = async (req, res) => {
   res.json({
     success: true,
     message: "password reset otp sent to the email",
+    user: user,
   });
 };
 
@@ -420,10 +440,11 @@ const resetPassword = async (req, res) => {
     subject: "Password Reset successfully",
     html: `<p>Password Reset successfully.Use your new password ofr logging</b></p>`,
   });
-
-  res
-    .status(201)
-    .json({ success: true, message: "Password Reset successfully" });
+  res.json({
+    success: true,
+    message: "password reset otp sent to the email",
+    user: user,
+  });
 };
 
 module.exports = {

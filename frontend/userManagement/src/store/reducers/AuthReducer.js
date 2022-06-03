@@ -1,4 +1,11 @@
-import { LOGIN, SIGNUP, REG_COMPLETE } from '../actions/ActionTypes';
+import {
+  LOGIN,
+  SIGN_UP,
+  REG_COMPLETE,
+  VERIFY_EMAIL,
+  RESET_PASSWORD,
+  FORGET_PASSWORD,
+} from '../actions/ActionTypes';
 
 const initialState = {
   id: null,
@@ -8,32 +15,32 @@ const initialState = {
   data: '',
   token: '',
   registrationComplete: false,
+  otp: '',
 };
 
 const AuthReducer = (state = initialState, action) => {
+  console.log('actionpayload from reducer=>>>', action);
   console.log('actionpayload from reducer=>>>', action.payload);
 
+  // console.log('user from reducer=>>>', action.payload.data.user.user);
   switch (action.type) {
     case LOGIN: {
-      // console.log('user from reducer=>>>', action.payload);
-      // console.log('user from reducer=>>>', action.payload.data);
-      // console.log('user from reducer=>>>', action.payload.data.token);
-      // console.log('user from reducer=>>>', action.payload.data.user);
-      // console.log('user from reducer=>>>', action.payload.data.user.email);
       return {
         ...state,
         id: action.payload.data.user._id,
         token: action.payload.data.token,
+        email: action.payload.data.user.email,
         userName: action.payload.data.user.name,
         registrationComplete: action.payload.regComp,
       };
     }
-    case SIGNUP: {
+    case SIGN_UP: {
       return {
         ...state,
-        id: action.payload.data.id,
-        // token: action.payload.data.token,
-        userName: action.payload.data.name,
+        id: action.payload.data.user._id,
+        token: action.payload.data.token,
+        email: action.payload.data.user.email,
+        userName: action.payload.data.user.name,
         data: action.payload,
       };
     }
@@ -41,6 +48,30 @@ const AuthReducer = (state = initialState, action) => {
       return {
         ...state,
         registrationComplete: true,
+      };
+    }
+    case VERIFY_EMAIL: {
+      return {
+        ...state,
+        id: action.payload.data.user._id,
+        otp: action.payload.data.user.otp,
+      };
+    }
+    case FORGET_PASSWORD: {
+      return {
+        ...state,
+        id: action.payload.data.user._id,
+        email: action.payload.data.user.email,
+        userName: action.payload.data.user.name,
+      };
+    }
+
+    case RESET_PASSWORD: {
+      return {
+        ...state,
+        id: action.payload.data.user._id,
+        email: action.payload.data.user.email,
+        otp: action.payload.data.user.otp,
       };
     }
     default:

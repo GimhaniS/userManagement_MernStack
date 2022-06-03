@@ -8,6 +8,7 @@ import {
   ResetPassword,
   OtpScreen,
   HomeScreen,
+  WelcomeScreen,
 } from '../screens';
 
 const Stack = createStackNavigator();

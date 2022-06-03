@@ -6,3 +6,4 @@ export * from './loadingScreen/LoadingScreen';
 export * from './forgetPasswrdScreen/ForgetPwScreen';
 export * from './forgetPasswrdScreen/ResetPassword';
 export * from './otpScreen/OtpScreen';
+export * from './welcomeScreen/WelcomeScreen';

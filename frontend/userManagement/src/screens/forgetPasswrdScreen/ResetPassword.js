@@ -53,6 +53,7 @@ const ResetPassword = ({ navigation }) => {
         value={nwPassword}
         onChangeText={(val) => setNwPassword(val)}
         error={nwPasswordError}
+        secureTextEntry={true}
       />
       <Button title="Send OTP" onpress={onpress} />
     </View>

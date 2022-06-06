@@ -71,6 +71,7 @@ const SignUpScreen = ({ navigation }) => {
         return null;
       } else {
         setEmailError('');
+        console.log('navgiting to otp screen');
         navigation.navigate('OtpScreen', { username, email, password });
       }
     }
@@ -118,6 +119,7 @@ const SignUpScreen = ({ navigation }) => {
         value={password}
         onChangeText={(val) => setPassword(val)}
         error={passwordError}
+        secureTextEntry={true}
       />
       <Button title="sign up" onpress={signUpHandler} />
     </View>

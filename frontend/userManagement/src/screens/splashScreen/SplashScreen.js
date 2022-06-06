@@ -4,9 +4,9 @@ import { COLORS } from '../../../utils/Colors';
 const user = require('../../assets/user.jpg');
 const SplashScreen = ({ navigation }) => {
   const navigationHandler = () => {
-    setTimeout(() => {
+    setInterval(() => {
       navigation.navigate('SignUpScreen');
-    }, 500);
+    }, 5000);
   };
   return (
     <View style={styles.container}>

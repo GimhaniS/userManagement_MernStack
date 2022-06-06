@@ -98,6 +98,7 @@ const SignInScreen = ({ navigation }) => {
         value={password}
         onChangeText={(val) => setPassword(val)}
         error={passwordError}
+        secureTextEntry={true}
       />
       <TouchableOpacity onPress={forgotPasswordHandler}>
         <Text style={styles.forgotPW}> Forgot password ?</Text>

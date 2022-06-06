@@ -9,7 +9,7 @@ import {
 } from 'react-native-responsive-screen';
 import { resetPasswordAction } from '../../store/actions/AuthActions';
 import { Button, UserInput, userInput } from '../../components';
-// import OTPInputView from '@twotalltotems/react-native-otp-input';
+import OTPInputView from '@twotalltotems/react-native-otp-input';
 const OtpScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ const OtpScreen = ({ navigation, route }) => {
   const { email } = route.params;
   const { password } = route.params;
   const { id, token } = useSelector((state) => state.authReducer);
-  // const otpRef = useRef(null);
+  const otpRef = useRef(null);
 
   useEffect(() => {
     console.log('user id===>', id);
@@ -61,12 +61,15 @@ const OtpScreen = ({ navigation, route }) => {
   };
   return (
     <View style={styles.container}>
+      <Text style={styles.vcode}>Verification Code</Text>
+      <Text style={styles.text}> Please enter the verification code sent to your email. </Text>
       {/* <OTPInputView
         style={{
           paddingLeft: wp(10),
           width: wp(85),
           height: 200,
           justifyContent: 'center',
+          backgroundColor: ' red,',
         }}
         pinCount={4}
         code={otpcode}
@@ -77,11 +80,12 @@ const OtpScreen = ({ navigation, route }) => {
         codeInputFieldStyle={styles.underlineStyleBase}
         codeInputHighlightStyle={styles.underlineStyleHighLighted}
         onCodeFilled={(otpcode) => {
-          console.log('otppp');
+          console.log('otppp', otpcode);
         }}
       /> */}
-      <Text style={styles.vcode}>Verification Code</Text>
-      <Text style={styles.text}> Please enter the verification code sent to your email. </Text>
+      {/* <Text style={styles.error}>{otpError}</Text> */}
+      {/* <Text style={styles.vcode}>Verification Code</Text>
+      <Text style={styles.text}> Please enter the verification code sent to your email. </Text> */}
       <UserInput
         title="Otp"
         // source={emailIcons}
@@ -112,6 +116,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     // paddingLeft: wp(4),
+    color: COLORS.fontTitle,
+    backgroundColor: COLORS.whiteBackground,
     width: 50,
     height: 45,
     borderWidth: 0,
@@ -119,11 +125,18 @@ const styles = StyleSheet.create({
     fontSize: 25,
   },
   underlineStyleHighLighted: {
-    borderColor: '#ED3D39',
+    borderColor: COLORS.buttonBackground,
+    backgroundColor: COLORS.whiteBackground,
   },
   vcode: {
     color: COLORS.fontTitle,
     fontSize: 35,
     fontWeight: '700',
+  },
+  error: {
+    color: COLORS.errorText,
+    fontSize: 15,
+    fontWeight: '600',
+    marginRight: wp(50),
   },
 });

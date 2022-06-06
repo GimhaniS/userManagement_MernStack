@@ -63,7 +63,7 @@ const OtpScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.vcode}>Verification Code</Text>
       <Text style={styles.text}> Please enter the verification code sent to your email. </Text>
-      {/* <OTPInputView
+      <OTPInputView
         style={{
           paddingLeft: wp(10),
           width: wp(85),
@@ -82,17 +82,17 @@ const OtpScreen = ({ navigation, route }) => {
         onCodeFilled={(otpcode) => {
           console.log('otppp', otpcode);
         }}
-      /> */}
+      />
       {/* <Text style={styles.error}>{otpError}</Text> */}
       {/* <Text style={styles.vcode}>Verification Code</Text>
       <Text style={styles.text}> Please enter the verification code sent to your email. </Text> */}
-      <UserInput
+      {/* <UserInput
         title="Otp"
         // source={emailIcons}
         value={otpcode}
         onChangeText={(val) => setOtpcode(val)}
         error={otpError}
-      />
+      /> */}
       <Button title="Send OTP" onpress={onpress} />
     </View>
   );

@@ -14,6 +14,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/tasks", require("./routes/todoRoutes"));
 // app.use(auth);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

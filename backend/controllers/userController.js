@@ -17,22 +17,26 @@ const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 //get all users
 ///////////////////////////////////
 const getUsers = async (req, res) => {
+  console.log("req.user====>", req.user);
   let users;
   try {
-    users = await User.find({}, "email name");
+    users = await User.findById(req.user);
   } catch (err) {
     // const error = new ErrorHandler("fetching users failed. ", 500);
     res.status(500).json({ message: "fetching users failed." });
     // return next(error);
   }
-  res
-    .status(200)
-    .json({ users: users.map((user) => user.toObject({ getters: true })) });
+  res.json({
+    success: true,
+    message: "get alll users",
+    user: users,
+  });
 };
 
 // register
 ////////////////////////////////////////////////////
 const userRegister = async (req, res) => {
+  //requesting name,email,password from the body(user input)
   const { name, email, password } = req.body;
 
   let errors = [];
@@ -122,6 +126,8 @@ const userRegister = async (req, res) => {
   try {
     const savedUser = await user.save();
     const verficationToken = await verfication_token.save();
+    // req.user = user._id.str;
+    // console.log("req===>", req.user);
   } catch (err) {
     res.status(500).json({ success: false, message: "signup failed." });
   }
@@ -145,7 +151,8 @@ const userLogin = async (req, res) => {
   const { email, password } = req.body;
   console.log("password", password);
   let errors = [];
-
+  // const tokenn = req.header("x-auth-token");
+  // console.log("tokenn====", tokenn);
   if (!password) {
     errors.push({ message: "password required.", status: 500 });
     return;
@@ -205,22 +212,14 @@ const userLogin = async (req, res) => {
       return;
     }
     if (decoded) {
+      // signInUser.token
       return res.status(200).json({
         success: true,
+        message: "signin successfully.welcome",
         token: token,
         user: signInUser,
       });
     }
-  });
-
-  // res
-  //   .status(201)
-  //   .json({ success: true, user: signInUser.toObject({ getters: true }) });
-
-  res.json({
-    success: true,
-    message: "signin successfully.welcome",
-    user: signInUser,
   });
 };
 
@@ -262,6 +261,8 @@ const verifyEmail = async (req, res) => {
   }
 
   userN.verified = true;
+  req.user = userN._id;
+  console.log("req.user", req.user);
 
   await verificationToken.findByIdAndDelete(token._id);
   await userN.save();

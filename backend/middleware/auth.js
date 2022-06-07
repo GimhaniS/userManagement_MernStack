@@ -1,13 +1,5 @@
 // const jwt = require("jsonwebtoken");
 
-// const auth = (email, userId, duration) => {
-//   const payload = {
-//     email: email,
-//     userId: userId,
-//   };
-
-//   return jwt.sign(payload, process.env.JWT_SECRET, {
-//     expiresIn: 86400,
-//   });
+// const auth = () => {
+//   const token = req.header("x-auth");
 // };
-// module.exports = auth;

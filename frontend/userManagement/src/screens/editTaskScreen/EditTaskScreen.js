@@ -37,13 +37,17 @@ const EditTaskScreen = ({ route, navigation }) => {
 
   const saveEditTaskHandler = async () => {
     console.log('saved');
-    // console.log('edit Task id', taskId);
-    // console.log('edit userId', id);
-    // console.log('edit task name', Tname);
-    // console.log('edit Taskdes', Tname);
-    const res = await dispatch(EditATask(taskId, id, Tname, TDescription));
-    console.log('ress--->', res);
-    navigation.goBack();
+    if (Tname === '') {
+      setTnameError('Please Enter Name For The Task');
+    }
+    if (TDescription === '') {
+      setTDescriptionError('Please Enter task description');
+    }
+    if (TDescription !== '' && Tname !== '') {
+      const res = await dispatch(EditATask(taskId, id, Tname, TDescription));
+      console.log('ress--->', res);
+      navigation.goBack();
+    }
   };
   return isLoading ? (
     <LoadingScreen />
@@ -65,6 +69,7 @@ const EditTaskScreen = ({ route, navigation }) => {
         <Text style={styles.textT}>Task Description</Text>
         <TextInput
           style={styles.descriptionInput}
+          multiline={true}
           placeholder={taskDescription}
           placeholderTextColor={COLORS.fontgrey}
           value={TDescription}
@@ -176,6 +181,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     marginRight: wp(50),
+    marginLeft: wp('2.5%'),
   },
   textT: {
     color: COLORS.fontTitle,

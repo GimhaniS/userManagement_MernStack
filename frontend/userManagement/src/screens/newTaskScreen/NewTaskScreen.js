@@ -22,17 +22,25 @@ const NewTaskScreen = ({ navigation }) => {
   };
 
   const saveHandler = async () => {
-    const data = {
-      userId: id,
-      taskName: newTname,
-      taskDescription: newTdescription,
-    };
+    if (newTname === '') {
+      setNewTnameError('Please Enter Name For The Task');
+    }
+    if (newTdescription === '') {
+      setNewTDescriptionEror('Please Enter task description');
+    }
+    if (newTname !== '' && newTdescription !== '') {
+      const data = {
+        userId: id,
+        taskName: newTname,
+        taskDescription: newTdescription,
+      };
 
-    console.log('data of new task', data);
-    const res = dispatch(createATask(id, newTname, newTdescription));
-    console.log('res--->', res);
-    console.log('saved');
-    navigation.goBack();
+      console.log('data of new task', data);
+      const res = dispatch(createATask(id, newTname, newTdescription));
+      console.log('res--->', res);
+      console.log('saved');
+      navigation.goBack();
+    }
   };
   return (
     <View style={styles.modalContainer}>
@@ -53,6 +61,7 @@ const NewTaskScreen = ({ navigation }) => {
           placeholder="Description"
           placeholderTextColor={COLORS.fontgrey}
           value={newTdescription}
+          multiline={true}
           onChangeText={(val) => setNewTdescription(val)}
         />
         <Text style={styles.error}>{newTDescriptionEror}</Text>
@@ -160,13 +169,14 @@ const styles = StyleSheet.create({
     color: COLORS.errorText,
     fontSize: 15,
     fontWeight: '600',
-    marginRight: wp(50),
+    marginLeft: wp('2.5%'),
   },
   textT: {
     color: COLORS.fontTitle,
     fontSize: 15,
     fontWeight: '600',
     marginLeft: wp('2.5%'),
+
     // marginRight: wp(65),
   },
 });

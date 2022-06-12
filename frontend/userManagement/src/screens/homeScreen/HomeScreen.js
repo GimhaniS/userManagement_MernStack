@@ -33,7 +33,7 @@ const add = require('../../assets/add.png');
 const HomeScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [deleteVisible, setDeleteVisible] = useState(false);
-
+  const [t_Id, setT_Id] = useState();
   const { taskId, taskName, taskDescription, task } = useSelector((state) => state.todoReducer);
   const { id } = useSelector((state) => state.authReducer);
 
@@ -42,9 +42,13 @@ const HomeScreen = ({ navigation }) => {
     setIsLoading(false);
     const ress = await dispatch(GetAllTasksByUserId(id));
     console.log('ress==>', ress);
-    console.log('tasks and description', task);
-  };
 
+    // console.log('tasks and description', task[0]._id);
+    // console.log('tasks and description', task[1]._id);
+    // console.log('tasks and description', task[2]._id);
+    // console.log('tasks and description', task[0]._id);
+  };
+  console.log('tasks and description', task);
   // useEffect(() => {
   //   console.log('tuser id-->', id);
   // }, [id]);
@@ -52,17 +56,18 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     setIsLoading(true);
     getData();
-  }, []);
+  }, [taskId]);
 
   useFocusEffect(
     React.useCallback(() => {
+      setIsLoading(true);
       getData();
-    }, [])
+    }, [isLoading])
   );
 
   const editTask = async (taskid) => {
+    console.log('task id---->', taskid);
     navigation.navigate('EditTaskScreen', { taskid: taskid });
-    console.log('task id', taskid);
   };
 
   const addNewtask = () => {
@@ -75,14 +80,19 @@ const HomeScreen = ({ navigation }) => {
     console.log('cancelled saving');
   };
 
-  const deleteYesHandler = async (tId) => {
+  const deleteYesHandler = async (tid) => {
+    console.log('tid', tid);
     setDeleteVisible(false);
-    console.log('task deleted', tId);
-    const res = dispatch(DeleteATask(tId));
+    console.log('task deleted', tid);
+    const res = dispatch(DeleteATask(tid));
     console.log('res->', res);
+    setIsLoading(false);
   };
-  const deleteTaskHandler = () => {
+  const deleteTaskHandler = (tId) => {
+    console.log('tId ', tId);
     setDeleteVisible(true);
+    setT_Id(tId);
+    console.log('t_id', t_Id);
   };
 
   return isLoading ? (
@@ -114,7 +124,7 @@ const HomeScreen = ({ navigation }) => {
             <TouchableOpacity style={styles.cancelButton} onPress={deleteNoHandler}>
               <Text style={styles.NOText}> NO </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.SaveButton} onPress={deleteYesHandler}>
+            <TouchableOpacity style={styles.SaveButton} onPress={() => deleteYesHandler(t_Id)}>
               <Text style={styles.saveText}> YES </Text>
             </TouchableOpacity>
           </View>

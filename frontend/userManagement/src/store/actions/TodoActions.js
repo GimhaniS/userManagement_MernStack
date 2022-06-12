@@ -57,10 +57,10 @@ export const DeleteATask = (id) => {
     try {
       const res = await api.delete(`tasks/deleteTask/${id}`);
       console.log('DELETE_TASK===>', res);
-      // dispatch({
-      //   type: DELETE_TASK,
-      //   payload: res,
-      // });
+      dispatch({
+        type: DELETE_TASK,
+        payload: res,
+      });
       return true;
     } catch (error) {
       console.log('DELETE_TASK ERROR===>', error);

@@ -9,6 +9,7 @@ import {
   ResetPassword,
   EditTaskScreen,
   NewTaskScreen,
+  LoadingScreen,
 } from '../screens';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -23,6 +24,7 @@ const HomeStack = () => {
         <Stack.Screen name="ResetPassword" component={ResetPassword} />
         <Stack.Screen name="EditTaskScreen" component={EditTaskScreen} />
         <Stack.Screen name="NewTaskScreen" component={NewTaskScreen} />
+        <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
       </>
     </Stack.Navigator>
   );

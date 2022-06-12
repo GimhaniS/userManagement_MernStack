@@ -85,21 +85,19 @@ const deleteTask = async (req, res) => {
   const taskToDelete = await Todo.findByIdAndDelete(req.params.id);
   console.log("delete task", taskToDelete);
   if (!taskToDelete) {
-    errors.push({ message: "task not found!", status: 500 });
+    errors.push({ message: "task not found!", status: 404 });
   }
   if (errors.length > 0) {
     return res.status(422).json({ errors: errors });
   }
-  res
-    .status(500)
-    .json({ success: true, message: "task deleted", task: taskToDelete });
+  res.json({ success: true, message: "task deleted", task: taskToDelete });
 };
 
 const updateTask = async (req, res) => {
   let errors = [];
   const taskToUpdate = await Todo.findByIdAndUpdate(req.params.id, req.body);
   if (!taskToUpdate) {
-    errors.push({ message: "task not found!", status: 500 });
+    errors.push({ message: "task not found!", status: 404 });
   }
   if (errors.length > 0) {
     return res.status(422).json({ errors: errors });

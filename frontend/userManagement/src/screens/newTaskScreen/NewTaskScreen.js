@@ -17,8 +17,8 @@ const NewTaskScreen = ({ navigation }) => {
   const { id } = useSelector((state) => state.authReducer);
   const dispatch = useDispatch();
   const cancelHandler = () => {
-    // setvisible(false);
     console.log('cancelled new task');
+    navigation.goBack();
   };
 
   const saveHandler = async () => {
@@ -31,7 +31,6 @@ const NewTaskScreen = ({ navigation }) => {
     console.log('data of new task', data);
     const res = dispatch(createATask(id, newTname, newTdescription));
     console.log('res--->', res);
-    // setvisible(false);
     console.log('saved');
     navigation.goBack();
   };

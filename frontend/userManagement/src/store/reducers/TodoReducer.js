@@ -47,9 +47,9 @@ const TodoReducer = (state = initialState, action) => {
     case DELETE_TASK: {
       return {
         ...state,
-        taskId: action.payload.data.user._id,
-        taskName: action.payload.data.user.taskName,
-        taskDescription: action.payload.data.taskDescription,
+        taskId: action.payload.data.task._id,
+        // taskName: action.payload.data.task.taskName,
+        // taskDescription: action.payload.task.taskDescription,
       };
     }
     case GET_ALL_TASKS_BYUSER_ID: {

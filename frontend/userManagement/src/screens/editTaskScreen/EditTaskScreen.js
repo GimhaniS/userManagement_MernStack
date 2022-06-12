@@ -21,10 +21,10 @@ const EditTaskScreen = ({ route, navigation }) => {
   const cancelEditTAskHandler = () => {
     // setisVisible(false);
     console.log('cancelled saving');
+    navigation.goBack();
   };
   const getData = async () => {
     setIsLoading(false);
-
     console.log('taskid==>', taskid);
     const ress = await dispatch(getDataByTaskId(taskid));
     console.log('ress==>', ress);
@@ -37,14 +37,12 @@ const EditTaskScreen = ({ route, navigation }) => {
 
   const saveEditTaskHandler = async () => {
     console.log('saved');
-    // console.log('edit Task id', task_Id);
-    console.log('edit Task id', taskId);
-    console.log('edit userId', id);
-    console.log('edit task name', Tname);
-    console.log('edit Taskdes', Tname);
+    // console.log('edit Task id', taskId);
+    // console.log('edit userId', id);
+    // console.log('edit task name', Tname);
+    // console.log('edit Taskdes', Tname);
     const res = await dispatch(EditATask(taskId, id, Tname, TDescription));
     console.log('ress--->', res);
-    // setisVisible(false);
     navigation.goBack();
   };
   return isLoading ? (

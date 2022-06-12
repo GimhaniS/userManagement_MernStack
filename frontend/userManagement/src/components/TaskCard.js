@@ -7,11 +7,22 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { COLORS } from '../../utils/Colors';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-const TaskCard = ({ task, description, editHandler, deleteHandler }) => {
+const TaskCard = ({
+  task,
+  description,
+  editHandler,
+  isSelected,
+  deleteHandler,
+  taskItemHandler,
+}) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.iconTouchable}>
-        <Icon name="square" size={20} style={styles.selectIcon} />
+      <TouchableOpacity style={styles.iconTouchable} onPress={taskItemHandler}>
+        {isSelected ? (
+          <Icon name="square-full" size={20} style={styles.selectIcon} />
+        ) : (
+          <Icon name="square" size={20} style={styles.selectIcon} />
+        )}
       </TouchableOpacity>
 
       <View style={styles.taskcardCol}>

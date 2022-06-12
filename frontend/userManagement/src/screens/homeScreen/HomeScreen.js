@@ -8,6 +8,7 @@ import {
   ScrollView,
   View,
   TouchableOpacity,
+  FlatList,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { COLORS } from '../../../utils/Colors';
@@ -33,30 +34,26 @@ const add = require('../../assets/add.png');
 const HomeScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [deleteVisible, setDeleteVisible] = useState(false);
+  const [edited, setEdited] = useState(false);
   const [t_Id, setT_Id] = useState();
+  const [taskArray, setTaskArray] = useState([]);
   const { taskId, taskName, taskDescription, task } = useSelector((state) => state.todoReducer);
   const { id } = useSelector((state) => state.authReducer);
 
   const dispatch = useDispatch();
+
   const getData = async () => {
     setIsLoading(false);
     const ress = await dispatch(GetAllTasksByUserId(id));
     console.log('ress==>', ress);
-
-    // console.log('tasks and description', task[0]._id);
-    // console.log('tasks and description', task[1]._id);
-    // console.log('tasks and description', task[2]._id);
-    // console.log('tasks and description', task[0]._id);
   };
   console.log('tasks and description', task);
-  // useEffect(() => {
-  //   console.log('tuser id-->', id);
-  // }, [id]);
 
   useEffect(() => {
+    setEdited(true);
     setIsLoading(true);
     getData();
-  }, [taskId]);
+  }, [taskId, id]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -64,6 +61,30 @@ const HomeScreen = ({ navigation }) => {
       getData();
     }, [isLoading])
   );
+  const renderItems = ({ item }) => {
+    return (
+      <TaskCard
+        task={item.taskName}
+        description={item.taskDescription}
+        editHandler={() => editTask(item._id)}
+        deleteHandler={() => deleteTaskHandler(item._id)}
+        key={item._id}
+        isSelected={item.isSelected}
+        taskItemHandler={() => taskItemHandler(item._id)}
+      />
+    );
+  };
+  useEffect(() => {
+    const temp = task;
+    console.log('tasks temp', temp);
+    console.log('tasktask', task);
+    temp.map((el) => {
+      el.isSelected = false;
+      return true;
+    });
+    console.log('tasks temp', temp);
+    setTaskArray(temp);
+  }, []);
 
   const editTask = async (taskid) => {
     console.log('task id---->', taskid);
@@ -95,24 +116,46 @@ const HomeScreen = ({ navigation }) => {
     console.log('t_id', t_Id);
   };
 
+  const taskItemHandler = (taskItemId) => {
+    const temp = task;
+    console.log('temp=====>', temp);
+    temp.map((el) => {
+      if (el._id === taskItemId) {
+        el.isSelected = !el.isSelected;
+        console.log('isSelected', el.isSelected);
+      }
+    });
+    setTaskArray(temp);
+    setEdited(!edited);
+  };
+
   return isLoading ? (
     <LoadingScreen />
   ) : (
-    <ScrollView contentContainerStyle={styles.container}>
+    // <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container2}>
       <Text style={styles.text}>Todo List</Text>
       <TouchableOpacity style={styles.addImageView} onPress={() => addNewtask()}>
         <Image source={add} style={styles.addImage} />
       </TouchableOpacity>
 
-      {task.map((el) => (
+      {/* {taskArray.map((el) => (
         <TaskCard
           task={el.taskName}
           description={el.taskDescription}
           editHandler={() => editTask(el._id)}
           deleteHandler={() => deleteTaskHandler(el._id)}
           key={el._id}
+          isSelected={el.isSelected}
+          taskItemHandler={taskItemHandler(el._id)}
         />
-      ))}
+      ))} */}
+      <FlatList
+        data={task}
+        extraData={task}
+        renderItem={renderItems}
+        keyExtractor={(item) => item._id}
+      />
 
       {/* deelete modal ======== */}
       <Modal visible={deleteVisible} animationType="slide">
@@ -130,7 +173,8 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
+    // </ScrollView>
   );
 };
 
@@ -139,6 +183,13 @@ export { HomeScreen };
 const styles = StyleSheet.create({
   container: {
     // flex: 1,
+    backgroundColor: '#F4F8FA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 70,
+  },
+  container2: {
+    flex: 1,
     backgroundColor: '#F4F8FA',
     alignItems: 'center',
     justifyContent: 'center',

@@ -9,6 +9,7 @@ const generatedOtp = require("../utils/mail");
 const createRandomBytes = require("../utils/helper");
 const nodemailer = require("nodemailer");
 const { isValidObjectId } = require("mongoose");
+const ObjectId = require("mongodb").ObjectId;
 
 const getAllToDos = async (req, res) => {
   const user_Id = req.user;
@@ -20,6 +21,23 @@ const getAllToDos = async (req, res) => {
   }
 
   res.status(200).json({ tasks });
+};
+
+const getAllTodosByUserId = async (req, res) => {
+  let errors = [];
+  const userTodos = await Todo.find({ owner: req.params.id });
+  console.log("userTodos", userTodos);
+  // if (!userTodos) {
+  //   errors.push({ message: "no tasks!", status: 404 });
+  // }
+  // if (errors.length > 0) {
+  //   return res.status(422).json({ errors: errors });
+  // }
+  res.json({
+    success: true,
+    message: "tasks successfully fetched",
+    task: userTodos,
+  });
 };
 
 const createTask = async (req, res) => {
@@ -65,6 +83,7 @@ const createTask = async (req, res) => {
 const deleteTask = async (req, res) => {
   let errors = [];
   const taskToDelete = await Todo.findByIdAndDelete(req.params.id);
+  console.log("delete task", taskToDelete);
   if (!taskToDelete) {
     errors.push({ message: "task not found!", status: 500 });
   }
@@ -78,20 +97,37 @@ const deleteTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   let errors = [];
-  const taskTpUpdate = await Todo.findByIdAndUpdate(req.params.id, req.body);
-  if (!taskTpUpdate) {
+  const taskToUpdate = await Todo.findByIdAndUpdate(req.params.id, req.body);
+  if (!taskToUpdate) {
     errors.push({ message: "task not found!", status: 500 });
   }
   if (errors.length > 0) {
     return res.status(422).json({ errors: errors });
   }
-  res
-    .status(500)
-    .json({ success: true, message: "task updated", task: taskTpUpdate });
+  res.json({ success: true, message: "task updated", task: taskToUpdate });
+};
+
+const getDataByTaskId = async (req, res) => {
+  let errors = [];
+  const taskDetails = await Todo.findById(req.params.id);
+  if (!taskDetails) {
+    res.status(404).json({ success: false, message: "no task found" });
+  }
+
+  // if (errors.length > 0) {
+  //   return res.status(422).json({ errors: errors });
+  // }
+  res.json({
+    success: true,
+    message: "tasks retreived",
+    task: taskDetails,
+  });
 };
 module.exports = {
   getAllToDos,
   createTask,
   deleteTask,
   updateTask,
+  getAllTodosByUserId,
+  getDataByTaskId,
 };

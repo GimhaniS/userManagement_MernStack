@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: hp(2),
     borderWidth: 2,
-    borderColor: COLORS.grey,
+    borderColor: '#F4F8FA',
     borderRadius: 5,
     height: hp(5),
     width: wp('95%'),

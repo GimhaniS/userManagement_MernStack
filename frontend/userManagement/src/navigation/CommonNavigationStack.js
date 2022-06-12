@@ -7,20 +7,22 @@ const Stack = createStackNavigator();
 const CommonNavigationStack = () => {
   const { token, registrationComplete } = useSelector((state) => state.authReducer);
   const [logged, setlogged] = useState(false);
-  const isLogged = () => {
+  const [initial, setInitial] = useState('splashScreen');
+
+  useEffect(() => {
     if (token && registrationComplete) {
+      console.log('token n registrationComplete--->', token, registrationComplete);
       setlogged(true);
     } else {
       setlogged(false);
+      console.log('nooooooo');
+      setInitial('SignUpScreen');
     }
-  };
-
-  useEffect(() => {
-    isLogged();
+    console.log('logged', logged);
   }, [token, registrationComplete]);
 
   return !logged ? (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initial}>
       <>
         <Stack.Screen name="RootNavigator" component={RootNavigatorStack} />
       </>

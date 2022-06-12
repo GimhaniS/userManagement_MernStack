@@ -16,11 +16,11 @@ export const LoginAction = (email, password) => {
         email: email,
         password: password,
       };
-      const res = await api.post('/login', params);
+      const res = await api.post('users/login', params);
       console.log('LOGIN---->', res);
       console.log('userToken', res.data.token);
 
-      // await AsyncStorage.setItem('userToken', res.data.token);
+      await AsyncStorage.setItem('userToken', res.data.token);
       const data = {
         data: res.data,
         regComp: true,
@@ -45,7 +45,7 @@ export const SignupAction = (name, email, password) => {
         email: email,
         password: password,
       };
-      const res = await api.post('/register', params);
+      const res = await api.post('users/register', params);
       console.log('SIGN UP---->', res);
       console.log('res---->', res.data);
       console.log('token---->', res.data.token);
@@ -85,7 +85,7 @@ export const VerifyEmailAction = (otp, userId) => {
         otp: otp,
         userId: userId,
       };
-      const res = await api.post('/verifyEmail', params);
+      const res = await api.post('users/verifyEmail', params);
       console.log('VERIFY EMAIL---->', res);
       console.log('res---->', res);
       console.log('res---->', res);
@@ -108,7 +108,7 @@ export const forgetPasswordAction = (email, userId) => {
         email: email,
         userId: userId,
       };
-      const res = await api.post('/forgotPassword', params);
+      const res = await api.post('users/forgotPassword', params);
       console.log('FORGET_PASSWORD---->', res);
       console.log('res---->', res.data);
 
@@ -136,7 +136,7 @@ export const resetPasswordAction = (otp, userId, password) => {
         userId: userId,
         password: password,
       };
-      const res = await api.post('/reset-password', params);
+      const res = await api.post('users/reset-password', params);
       console.log('RESET_PASSWORD---->', res);
       console.log('res---->', res.data);
 

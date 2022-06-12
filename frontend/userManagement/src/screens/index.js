@@ -7,3 +7,5 @@ export * from './forgetPasswrdScreen/ForgetPwScreen';
 export * from './forgetPasswrdScreen/ResetPassword';
 export * from './otpScreen/OtpScreen';
 export * from './welcomeScreen/WelcomeScreen';
+export * from './editTaskScreen/EditTaskScreen';
+export * from './newTaskScreen/NewTaskScreen';

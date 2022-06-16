@@ -7,7 +7,7 @@ import {
   SplashScreen,
   ResetPassword,
   OtpScreen,
-  // HomeScreen,
+  HomeScreen,
   WelcomeScreen,
 } from '../screens';
 
@@ -25,6 +25,7 @@ const RootNavigatorStack = () => {
         <Stack.Screen name="ForgetPwScreen" component={ForgetPwScreen} />
         <Stack.Screen name="ResetPassword" component={ResetPassword} />
         <Stack.Screen name="OtpScreen" component={OtpScreen} />
+        <Stack.Screen name="HomeScreen" component={HomeScreen} />
       </>
     </Stack.Navigator>
   );
